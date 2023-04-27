@@ -19,25 +19,62 @@ import { TextField
 //   credentials: 'include' 
 //
 
+
 class addAssignment extends React.Component {
-    constructor(props) {
+  constructor(props) {
       super(props);
-      this.state = {selected: 0, assignments: []};
-    };
+      // this.state = {selected: 0, assignments: []};
+      this.state = {assignmentName: "", dueDate: "", courseName: 0}; 
+  };
     
-   onRadioClick = (event) => {
-    console.log("Assignment.onRadioClick " + event.target.value);
-    this.setState({selected: event.target.value});
-  }
-  
+    assignmentHandler = (event) => {
+      this.setState({[event.target.assignmentName]: event.target.value});
+    };
+
+    assignmentHandler = (event) => {
+      this.setState({[event.target.dueDate]: event.target.value}); 
+    };
+
+    assignmentHandler = (event) => {
+      this.setState({[event.target.course_id]: event.target.value}); 
+    };
+
+
+  // CHANGE URL AND INFO IM SENDING TO MATH BACKEND 
+  addAssignment = (event) => {
+    event.preventDefault(); 
+    const token = Cookies.get('XSRF-TOKEN');
+    fetch(`${SERVER_URL}/assignment?name=${this.state.assignmentName}&dueDate=${this.state.dueDate}&courseld=${this.state.course_id}`,
+      {  
+        method: 'POST', 
+        headers: 
+        { 
+          'X-XSRF-TOKEN': token,
+          'Content-Type': 'application/json'
+        },
+      } )
+
+    .then(res => {
+        if (res.ok) {
+          toast.success("Assignment successfully added", {
+              position: toast.POSITION.BOTTOM_LEFT
+          });
+          this.fetchAssignments();
+        } else {
+          toast.error("Error new assignment failed.", {
+              position: toast.POSITION.BOTTOM_LEFT
+          });
+          console.error('Post http status =' + res.status);
+        }})
+    .catch(err => {
+      toast.error("Error new assignment failed.", {
+            position: toast.POSITION.BOTTOM_LEFT
+        });
+        console.error(err);
+    })
+  } 
+
   render() {
-    const columns = [
-        { field: 'firstName', headerName: 'Assignment Name', width: 200 },
-        { field: 'lastName', headerName: 'Due Date', width: 200 },
-        { field: 'email', headerName: 'Course', width: 250 },
-        ];
-      
-    const assignmentSelected = this.state.assignments[this.state.selected];
       return (
         <div>
             <DialogTitle>Add Assignment</DialogTitle>
@@ -57,6 +94,7 @@ class addAssignment extends React.Component {
         </div>
       )
   }
-}  
+}
 
 export default addAssignment;
+
